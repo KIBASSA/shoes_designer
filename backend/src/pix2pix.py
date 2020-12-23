@@ -1,4 +1,46 @@
+
+import glob
+import torch
+from torch import nn
+from tqdm.auto import tqdm
+from torchvision import transforms
+from torchvision.utils import make_grid
+from torch.utils.data import DataLoader
+import matplotlib.pyplot as plt
+torch.manual_seed(0)
+from torch.utils.data import Dataset
+
 import torch.nn.functional as F
+
+def show_tensor_images(image_tensor, num_images=25, size=(1, 28, 28)):
+    '''
+    Function for visualizing images: Given a tensor of images, number of images, and
+    size per image, plots and prints the images in an uniform grid.
+    '''
+    image_shifted = image_tensor
+    image_unflat = image_shifted.detach().cpu().view(-1, *size)
+    image_grid = make_grid(image_unflat[:num_images], nrow=5)
+    plt.imshow(image_grid.permute(1, 2, 0).squeeze())
+    plt.show()
+
+#credit source : https://discuss.pytorch.org/t/how-make-customised-dataset-for-semantic-segmentation/30881/5
+class CustomDataset(Dataset):
+    def __init__(self, image_paths, target_paths, train=True):   # initial logic happens like transform
+
+        self.image_paths = image_paths
+        self.target_paths = target_paths
+        self.transforms = transforms.ToTensor()
+
+    def __getitem__(self, index):
+
+        image = Image.open(self.image_paths[index])
+        mask = Image.open(self.target_paths[index])
+        t_image = self.transforms(image)
+        return t_image, mask
+
+    def __len__(self):  # return count of sample we have
+
+        return len(self.image_paths)
 
 def crop(image, new_shape):
     '''
@@ -71,6 +113,7 @@ class ExpandingBlock(nn.Module):
         super(ExpandingBlock, self).__init__()
         self.upsample = nn.Upsample(scale_factor=2, mode='bilinear', align_corners=True)
         self.conv1 = nn.Conv2d(input_channels, input_channels // 2, kernel_size=2)
+        #ici on maintient input_channels en input parce qu'il y a concatenation (crop + concat) input_channels // 2 venant de la partie encoder
         self.conv2 = nn.Conv2d(input_channels, input_channels // 2, kernel_size=3, padding=1)
         self.conv3 = nn.Conv2d(input_channels // 2, input_channels // 2, kernel_size=2, padding=1)
         if use_bn:
@@ -325,20 +368,49 @@ import numpy as np
 def train(save_model=False):
     mean_generator_loss = 0
     mean_discriminator_loss = 0
+
     dataloader = DataLoader(dataset, batch_size=batch_size, shuffle=True)
+
+    # get all the image and mask path and number of images
+    folder_data = glob.glob("D:\\Neda\\Pytorch\\U-net\\BMMCdata\\data\\*.tif")
+    folder_mask = glob.glob("D:\\Neda\\Pytorch\\U-net\\BMMCmasks\\masks\\*.tif")
+    # split these path using a certain percentage
+    len_data = len(folder_data)
+    print(len_data)
+    train_size = 0.6
+
+    train_image_paths = folder_data[:int(len_data * train_size)]
+    test_image_paths = folder_data[int(len_data * train_size):]
+
+    train_mask_paths = folder_mask[:int(len_data * train_size)]
+    test_mask_paths = folder_mask[int(len_data * train_size):]
+
+    train_dataset = CustomDataset(train_image_paths, train_mask_paths, train=True)
+    train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=4, shuffle=True, num_workers=1)
+
+    test_dataset = CustomDataset(test_image_paths, test_mask_paths, train=False)
+    test_loader = torch.utils.data.DataLoader(test_dataset, batch_size=4, shuffle=False, num_workers=1)
+
     cur_step = 0
 
     for epoch in range(n_epochs):
         # Dataloader returns the batches
-        for image, _ in tqdm(dataloader):
-            image_width = image.shape[3]
-            condition = image[:, :, :, :image_width // 2]
-            condition = nn.functional.interpolate(condition, size=target_shape)
-            real = image[:, :, :, image_width // 2:]
-            real = nn.functional.interpolate(real, size=target_shape)
-            cur_batch_size = len(condition)
+        for image, mask in tqdm(train_loader):
+
+            #image_width = image.shape[3]
+            #condition = image[:, :, :, :image_width // 2]
+            #condition = nn.functional.interpolate(condition, size=target_shape)
+            #real = image[:, :, :, image_width // 2:]
+            #real = nn.functional.interpolate(real, size=target_shape)
+            #cur_batch_size = len(condition)
+            #condition = condition.to(device)
+            #real = real.to(device)
+
+            condition = mask # c'est sont les images en mode dessin 
             condition = condition.to(device)
+            real = image # c'est des images réel
             real = real.to(device)
+            
 
             ### Update discriminator ###
             disc_opt.zero_grad() # Zero out the gradient before backpropagation
@@ -382,4 +454,4 @@ def train(save_model=False):
                         'disc_opt': disc_opt.state_dict()
                     }, f"pix2pix_{cur_step}.pth")
             cur_step += 1
-train()
+#train()
