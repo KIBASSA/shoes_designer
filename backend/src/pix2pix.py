@@ -7,6 +7,7 @@ from torchvision import transforms
 from torchvision.utils import make_grid
 from torch.utils.data import DataLoader
 import matplotlib.pyplot as plt
+from PIL import Image
 torch.manual_seed(0)
 from torch.utils.data import Dataset
 
@@ -26,16 +27,21 @@ def show_tensor_images(image_tensor, num_images=25, size=(1, 28, 28)):
 #credit source : https://discuss.pytorch.org/t/how-make-customised-dataset-for-semantic-segmentation/30881/5
 class CustomDataset(Dataset):
     def __init__(self, image_paths, target_paths, train=True):   # initial logic happens like transform
-
         self.image_paths = image_paths
         self.target_paths = target_paths
-        self.transforms = transforms.ToTensor()
+
+        self.transforms = transforms.Compose([transforms.ToTensor(),transforms.Resize((256,256))])
+
+        #self.transforms = transforms.ToTensor()
+        #self.transforms = transforms.Scale((256,256))
 
     def __getitem__(self, index):
-
         image = Image.open(self.image_paths[index])
+        
         mask = Image.open(self.target_paths[index])
+        
         t_image = self.transforms(image)
+        mask = self.transforms(image)
         return t_image, mask
 
     def __len__(self):  # return count of sample we have
@@ -286,6 +292,10 @@ batch_size = 4
 lr = 0.0002
 target_shape = 256
 device = 'cuda'
+if not torch.cuda.is_available():
+    device = "cpu"
+
+#device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 """You will then pre-process the images of the dataset to make sure they're all the same size and that the size change due to U-Net layers is accounted for.
 """
@@ -295,7 +305,7 @@ transform = transforms.Compose([
 ])
 
 import torchvision
-dataset = torchvision.datasets.ImageFolder("maps", transform=transform)
+#dataset = torchvision.datasets.ImageFolder("maps", transform=transform)
 
 """Next, you can initialize your generator (U-Net) and discriminator, as well as their optimizers. Finally, you will also load your pre-trained model.
 """
@@ -369,15 +379,16 @@ def train(save_model=False):
     mean_generator_loss = 0
     mean_discriminator_loss = 0
 
-    dataloader = DataLoader(dataset, batch_size=batch_size, shuffle=True)
+    #dataloader = DataLoader(dataset, batch_size=batch_size, shuffle=True)
 
     # get all the image and mask path and number of images
-    folder_data = glob.glob("D:\\Neda\\Pytorch\\U-net\\BMMCdata\\data\\*.tif")
-    folder_mask = glob.glob("D:\\Neda\\Pytorch\\U-net\\BMMCmasks\\masks\\*.tif")
+    #100627.255_hed_
+    folder_data = glob.glob("../data/zap50k_pair/**/*_real_.jpg")
+    folder_mask = glob.glob("../data/zap50k_pair/**/*_canny_.jpg")
     # split these path using a certain percentage
     len_data = len(folder_data)
     print(len_data)
-    train_size = 0.6
+    train_size = 0.8
 
     train_image_paths = folder_data[:int(len_data * train_size)]
     test_image_paths = folder_data[int(len_data * train_size):]
@@ -386,10 +397,15 @@ def train(save_model=False):
     test_mask_paths = folder_mask[int(len_data * train_size):]
 
     train_dataset = CustomDataset(train_image_paths, train_mask_paths, train=True)
-    train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=4, shuffle=True, num_workers=1)
+    train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=4, shuffle=True)
 
     test_dataset = CustomDataset(test_image_paths, test_mask_paths, train=False)
-    test_loader = torch.utils.data.DataLoader(test_dataset, batch_size=4, shuffle=False, num_workers=1)
+    test_loader = torch.utils.data.DataLoader(test_dataset, batch_size=4, shuffle=False)
+
+    #print("iciiiiiiiiii")
+    #dataiter = iter(train_loader)
+    #_images, _labels = dataiter.next()
+    #raise Exception("aie aie aie")
 
     cur_step = 0
 
@@ -407,10 +423,12 @@ def train(save_model=False):
             #real = real.to(device)
 
             condition = mask # c'est sont les images en mode dessin 
+            condition = nn.functional.interpolate(condition, size=target_shape)
             condition = condition.to(device)
             real = image # c'est des images réel
+            real = nn.functional.interpolate(real, size=target_shape)
             real = real.to(device)
-            
+
 
             ### Update discriminator ###
             disc_opt.zero_grad() # Zero out the gradient before backpropagation

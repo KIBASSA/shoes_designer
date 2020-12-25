@@ -18,7 +18,10 @@ class Controller(object):
             if not os.path.isdir(filename_dir):
                 os.makedirs(filename_dir)
             #copy the first element of the pair
-            shutil.copy(file, filename_dir)    
+
+            filename_real = filename_arr[0] + "_real_" + filename_arr[1] 
+            filename_real = os.path.join(filename_dir, filename_real)
+            shutil.copy(file, filename_real)    
             canny, hed = edge_transformer.transform(file)
             
             filename_hed = filename_arr[0] + "_hed_" + filename_arr[1]
