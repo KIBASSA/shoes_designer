@@ -32,15 +32,26 @@ class Controller(object):
         
         #begin GANs traning
 
+    def process2(self, folder_src, folder_dest):
+        if not os.path.isdir(folder_dest):
+            os.makedirs(folder_dest)
+        for file in glob.glob(folder_src + '/**/*.jpg', recursive=True):
+            filename = os.path.basename(file)
+            filename_real = os.path.join(folder_dest, filename)
+            shutil.copy(file, filename_real)
+
 
 if __name__ == "__main__":
-    folder_src = "../data/zap50k/"
+    #folder_src = "../data/zap50k/"
+    folder_src = "../data/zap50k_cluster_style/style_black_brilliant/"
     folder_dest = "../data/zap50k_pair"
+    #folder_dest_lake = "../data/zap50k_lake"
     edge_models_path = "../models/hed_model"
 
     edge_transformer = EdgeTransformer(edge_models_path)
     controller = Controller()
     controller.process(folder_src, folder_dest, edge_transformer)
+    #controller.process2(folder_src, folder_dest_lake)
 
         
         

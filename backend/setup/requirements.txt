@@ -1,0 +1,7 @@
+opencv-python
+tqdm
+matplotlib
+scikit-image
+flask
+flask_restful
+#conda install pytorch torchvision torchaudio cudatoolkit=10.2 -c pytorch

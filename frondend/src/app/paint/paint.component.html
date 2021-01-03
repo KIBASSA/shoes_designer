@@ -1,0 +1,58 @@
+<header>
+    <div class="navbar navbar-dark bg-dark box-shadow">
+      <div class="container d-flex justify-content-between">
+        <a href="#" class="navbar-brand d-flex align-items-center">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2">
+            <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg>
+          <strong>Images Recommender</strong>
+        </a>
+        <button class="navbar-toggler collapsed" type="button" data-toggle="collapse" data-target="#navbarHeader" aria-controls="navbarHeader" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+      </div>
+    </div>
+  </header>
+  <main role="main">
+    <div class="container d-flex justify-content-between" style="margin-top: 10px;">
+      <section style="width: 100%;">
+        <h3>Paint something!</h3>
+        <div class="row">
+          <div class="col-md-5">
+            <div class="btn-group" style="margin: 5px;" role="group" aria-label="Basic example">
+              <button type="button" class="btn btn-primary"
+              [disabled]="true">
+                <i class="mdi mdi-pencil menu-icon"></i>
+                Draw
+              </button>
+              <button type="button" class="btn btn-success"
+              [disabled]="true">
+                <i class="mdi mdi-eraser menu-icon"></i>
+                Erase
+              </button>
+              <button type="button" class="btn btn-info"
+              (click)="reset()">
+                <i class="mdi mdi-tumblr-reblog"></i>
+                Reset
+              </button>
+            </div>
+            <canvas #mount></canvas>
+          </div>
+          <div class="col-md-2">
+            <button type="button" 
+                    class="btn btn-outline-primary" 
+                    (click)="transform()"
+                    style="margin-top: 50px;"> >> Transform</button>
+          </div>
+          <div class="col-md-5">
+            <img [src]= "generatedImage" 
+            alt="IA"
+            style="margin-top: 50px;" class="img-thumbnail">
+          </div>
+        </div>
+      </section>
+    </div>
+  </main> 
+  
+  
+
+  
