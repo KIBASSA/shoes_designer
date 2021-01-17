@@ -1,0 +1,63 @@
+<div class="main-content">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-4">
+                <div class="card card-chart">
+                    <div class="card-header card-header-success">
+                        <h4>Upload image</h4>
+                    </div>
+                    <div class="card-body">
+                        <input #file type="file" class="btn btn-danger pull-left"  
+                                                 (change)="fileChange(file.files)" 
+                                                 placeholder="Upload file" 
+                                                 accept=".jpg,.png,.jpeg">
+                        <img [src]="imgURL" style="margin-top: 5px;" height="500" *ngIf="imgURL">
+                    </div>
+                    <div class="card-footer">
+                        <div class="stats">
+                            <i class="material-icons">access_time</i> updated 4 minutes ago
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card card-chart">
+                    <div class="card-header card-header-warning">
+                        <h4>Convert to drawing</h4>
+                    </div>
+                    <div class="card-body">
+                        <button mat-raised-button type="submit" 
+                        class="btn btn-danger pull-left"
+                        (click)="convertImageToEdge()">Convert</button>
+                        <img [src]="imgEdgeURL" style="margin-top: 5px;" height="500" *ngIf="imgEdgeURL">
+                    </div>
+                    <div class="card-footer">
+                        <div class="stats">
+                            <i class="material-icons">access_time</i> campaign sent 2 days ago
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card card-chart">
+                    <div class="card-header card-header-danger">
+                        <h4>Convert to black leather</h4>
+                    </div>
+                    <div class="card-body">
+                        <button mat-raised-button 
+                        type="submit" 
+                        class="btn btn-danger pull-left"
+                        (click)="convertEdgeToImage()">Convert</button>
+                        <img [src]="imgIBlackLeather" style="margin-top: 5px;" height="500" *ngIf="imgIBlackLeather">
+                    </div>
+                    <div class="card-footer">
+                        <div class="stats">
+                            <i class="material-icons">access_time</i> campaign sent 2 days ago
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+  </div>
+  

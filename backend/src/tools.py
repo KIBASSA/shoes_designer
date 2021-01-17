@@ -56,9 +56,7 @@ class Helper:
             local_full_path_file = os.path.join(dir, "{0}{1}".format(Helper.generate_name(), ext))
             print("local_full_path_file : ", local_full_path_file)
             exts = ["jpeg", "jpg", "png", "gif", "tiff"]
-            #for ext in exts:
-            #    img_data = img_data.replace("data:image/{0};base64,".format(ext), "")
-            print("count :", len(img_data.split(',')[1].encode()))
+            
             with open(local_full_path_file, 'wb') as f:
                 content = img_data.split(',')[1]
                 encoded_content= content.encode()

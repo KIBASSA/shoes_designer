@@ -43,8 +43,11 @@ class Controller(object):
 
 if __name__ == "__main__":
     #folder_src = "../data/zap50k/"
-    folder_src = "../data/zap50k_cluster_style/style_black_brilliant/"
-    folder_dest = "../data/zap50k_pair"
+    #folder_src = "../data/zap50k_cluster_style/style_black_brilliant/"
+    #folder_dest = "../data/zap50k_pair"
+    folder_src = "../data/high resolution_style_black_brilliant/"
+    folder_dest = "../data/high resolution_style_black_brilliant_pair/"
+
     #folder_dest_lake = "../data/zap50k_lake"
     edge_models_path = "../models/hed_model"
 

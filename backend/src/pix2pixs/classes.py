@@ -12,7 +12,7 @@ def show_tensor_images(image_tensor, num_images=25, size=(1, 28, 28)):
     image_grid = make_grid(image_unflat[:num_images], nrow=5)
     #plt.imshow(image_grid.permute(1, 2, 0).squeeze())
     #plt.show()
-    fig, ax = plt.subplots(figsize=(8,15))
+    fig, ax = plt.subplots(figsize=(15,20))
     ax.imshow(image_grid.permute(1, 2, 0).squeeze())
     plt.tight_layout()
     plt.show()

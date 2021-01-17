@@ -10,10 +10,34 @@ import matplotlib.pyplot as plt
 from PIL import Image
 torch.manual_seed(0)
 from torch.utils.data import Dataset
-from classes import ContractingBlock, ExpandingBlock, FeatureMapBlock, UNet, Discriminator
+from classes import ContractingBlock, ExpandingBlock, FeatureMapBlock, UNet, Discriminator, show_tensor_images
+import numpy as np
 import torch.nn.functional as F
 
+# New parameters
+adv_criterion = nn.BCEWithLogitsLoss() 
+recon_criterion = nn.L1Loss() 
+lambda_recon = 200
 
+n_epochs = 40
+input_dim = 1 # for edge image (1, 512, 512 )
+real_dim = 3
+display_step = 200
+batch_size = 4
+lr = 0.0002
+target_shape = 512
+device = 'cpu'
+#device = 'cuda'
+#if not torch.cuda.is_available():
+#    device = "cpu"
+
+
+class CropImage(object):
+    def __call__(self, image):
+        _,w, h = image.size()
+        diff = (w - h)//2
+        image = image[:,diff: h + diff,:]
+        return image
 
 #credit source : https://discuss.pytorch.org/t/how-make-customised-dataset-for-semantic-segmentation/30881/5
 class CustomDataset(Dataset):
@@ -21,7 +45,7 @@ class CustomDataset(Dataset):
         self.image_paths = image_paths
         self.target_paths = target_paths
 
-        self.transforms = transforms.Compose([transforms.ToTensor(),transforms.Resize((256,256))])
+        self.transforms = transforms.Compose([transforms.ToTensor(),CropImage(), transforms.Resize((target_shape,target_shape))])
 
         #self.transforms = transforms.ToTensor()
         #self.transforms = transforms.Scale((256,256))
@@ -39,22 +63,6 @@ class CustomDataset(Dataset):
 
         return len(self.image_paths)
 
-# New parameters
-adv_criterion = nn.BCEWithLogitsLoss() 
-recon_criterion = nn.L1Loss() 
-lambda_recon = 200
-
-n_epochs = 40
-input_dim = 1 # for edge image (1, 256, 256 )
-real_dim = 3
-display_step = 200
-batch_size = 4
-lr = 0.0002
-target_shape = 256
-device = 'cpu'
-#device = 'cuda'
-#if not torch.cuda.is_available():
-#    device = "cpu"
 
 #device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
@@ -86,7 +94,7 @@ def weights_init(m):
 # Feel free to change pretrained to False if you're training the model from scratch
 pretrained = True
 if pretrained:
-    loaded_state = torch.load("pix2pix_black_briant9000.pth")
+    loaded_state = torch.load("pix2pix_black_briant_high_resolution7600.pth")
     gen.load_state_dict(loaded_state["gen"])
     gen_opt.load_state_dict(loaded_state["gen_opt"])
     disc.load_state_dict(loaded_state["disc"])
@@ -136,7 +144,7 @@ Finally, you can train the model and see some of your maps!
 from skimage import color
 import numpy as np
 
-def train(model_name, save_model=True):
+def train(model_name, dir, save_model=True):
     mean_generator_loss = 0
     mean_discriminator_loss = 0
     print("save_model :", save_model)
@@ -144,8 +152,8 @@ def train(model_name, save_model=True):
 
     # get all the image and mask path and number of images
     #100627.255_hed_
-    folder_data = glob.glob("../data/zap50k_pair/**/*_real_.jpg")
-    folder_mask = glob.glob("../data/zap50k_pair/**/*_canny_.jpg")
+    folder_data = glob.glob(dir + "/**/*_real_.jpg")
+    folder_mask = glob.glob(dir + "/**/*_hed_.jpg")
     # split these path using a certain percentage
     len_data = len(folder_data)
     print(len_data)
