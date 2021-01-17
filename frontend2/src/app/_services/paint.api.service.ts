@@ -26,7 +26,19 @@ export class PaintApiService {
             return of(null);
               })
         );
-  }
+    }
+
+    //generate_shoe_by_hed
+    generate_shoe_by_hed(image:string) : Observable<string> {
+      return this.http.get<any>(`${API_URL}/generate_shoe_by_hed?image=${image}`)
+        .pipe(
+          catchError(err => {
+            console.log(err);
+            return of(null);
+              })
+        );
+    }
+
     //test_too_large
     test_too_large(image: string): Observable<string> {
       return this.http.get<any>(`${API_URL}/test_too_large`)

@@ -44,7 +44,7 @@ export class TwophasesComponent implements OnInit {
 
    convertEdgeToImage()
    {
-    this.paintApi.generate_shoe(this.imgEdgeURL).subscribe(res=> 
+    this.paintApi.generate_shoe_by_hed(this.imgEdgeURL).subscribe(res=> 
       {
         this.imgIBlackLeather = res
       })

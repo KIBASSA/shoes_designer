@@ -94,7 +94,7 @@ def weights_init(m):
 # Feel free to change pretrained to False if you're training the model from scratch
 pretrained = True
 if pretrained:
-    loaded_state = torch.load("pix2pix_black_briant_high_resolution7600.pth")
+    loaded_state = torch.load("pix2pix_black_briant_high_resolution1800.pth")
     gen.load_state_dict(loaded_state["gen"])
     gen_opt.load_state_dict(loaded_state["gen_opt"])
     disc.load_state_dict(loaded_state["disc"])
@@ -192,10 +192,10 @@ def train(model_name, dir, save_model=True):
             #condition = condition.to(device)
             #real = real.to(device)
 
-            condition = mask # c'est sont les images en mode dessin 
+            condition = mask # c'est sont les images en mode dessin
             condition = nn.functional.interpolate(condition, size=target_shape)
             condition = condition.to(device)
-            real = image # c'est des images réel
+            real = image # c'est des images réelles
             real = nn.functional.interpolate(real, size=target_shape)
             real = real.to(device)
 

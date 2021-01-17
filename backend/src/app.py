@@ -20,6 +20,7 @@ import numpy as np
 from mimetypes import guess_extension, guess_type
 from edge_detector import EdgeTransformer
 import tempfile
+from torch import nn
 #initialization for flask app
 app = Flask(__name__)
 api = Api(app)  # type: Api
@@ -31,7 +32,7 @@ image_shape = (512,512)
 
 #load model
 gen = UNet(input_dim, real_dim).to(device)
-loaded_state = torch.load("../notebooks/best_weight/pix2pix_black_briant400.pth")
+loaded_state = torch.load("../notebooks/best_weight/pix2pix_black_briant_high_resolution1800.pth")
 gen.load_state_dict(loaded_state["gen"])
 
 transforms = transforms.Compose([transforms.ToTensor(),transforms.Resize(image_shape)])
@@ -73,12 +74,56 @@ def generate_edge():
             decoded = Helper.decode_base64(encoded_content)
             f.write(decoded)
         _, hed = edge_transformer.transform(local_full_path_file)
+        #hed = np.invert(hed) #inverse color
         filename_hed = os.path.join(folder, "{0}_hed_{1}".format(Helper.generate_name(), ext))
-        cv2.imwrite(os.path.join(folder, filename_hed), hed)
+        cv2.imwrite(filename_hed, hed)
         with open(filename_hed, "rb") as image_file:
             encoded_string = base64.b64encode(image_file.read()).decode('ascii')
-    return jsonify("data:image/png;base64," + encoded_string)
+    
+        hed_image_base64 = "data:image/png;base64," + encoded_string
 
+        mask = Image.open(filename_hed)
+        mask = transforms(mask)
+        mask = mask.unsqueeze(0)
+        mask = nn.functional.interpolate(mask, size=image_shape)
+        mask = mask.to(device)
+        with torch.no_grad():
+            generated_image = gen(mask)
+        generated_image_file = os.path.join(folder, Helper.generate_name() + ".png")
+        save_image(generated_image[0], generated_image_file)
+        with open(generated_image_file, "rb") as image_file:
+            encoded_string = base64.b64encode(image_file.read()).decode('ascii')
+        generated_image_base64 = "data:image/png;base64," + encoded_string
+
+    return jsonify(generated_image_base64)
+
+@app.route('/generate_shoe_by_hed', methods=['GET'])
+def generate_shoe_by_hed():
+    base64Img = request.args.get('image')
+    base64Img = base64Img.replace(" ", "+")
+    """"""
+    base64Img = Helper.get_fixed_base64_image(base64Img)
+    decoded_img = base64.b64decode(base64Img)
+    img_buffer = BytesIO(decoded_img)
+    imageData = Image.open(img_buffer).convert('LA')
+    
+    img = ImageOps.fit(imageData, image_shape)
+    img_tensor = transforms(img)
+    img_tensor = img_tensor.unsqueeze(0)
+    print("img_tensor.shape : ", img_tensor.shape)
+    img = cv2.imdecode(img, cv2.IMREAD_COLOR)
+    cv2.imshow(img)
+    cv2.waitKey(0)
+    with torch.no_grad():
+        generated_image = gen(img_tensor[:,0:1,:,:])
+        print("generated_image.shape : ", generated_image.shape)
+    save_image(generated_image[0], "image1.png")
+    with open("image1.png", "rb") as image_file:
+        encoded_string = base64.b64encode(image_file.read()).decode('ascii')
+
+    return jsonify("data:image/png;base64," + encoded_string)
+    
+    #return jsonify(base64Img)
     
 @app.route('/generate_shoe', methods=['GET'])
 def generate_shoe():
@@ -89,21 +134,17 @@ def generate_shoe():
     decoded_img = base64.b64decode(base64Img)
     img_buffer = BytesIO(decoded_img)
     imageData = Image.open(img_buffer).convert('LA')
-    num_channel = len(imageData.split())
-    print("num_channel:", num_channel)
+    #num_channel = len(imageData.split())
+    #print("num_channel:", num_channel)
     img = ImageOps.fit(imageData, image_shape)
     img_tensor = transforms(img)
-    print("img_tensor.shape : ", img_tensor.shape)
     img_tensor = img_tensor.unsqueeze(0)
-    #img_conv = np.array(img)
     with torch.no_grad():
         generated_image = gen(img_tensor[:,1:2,:,:])
         print("generated_image.shape : ", generated_image.shape)
-    #show_tensor_images(generated_image[0], size=(3, 256, 256))
     save_image(generated_image[0], "image1.png")
     with open("image1.png", "rb") as image_file:
         encoded_string = base64.b64encode(image_file.read()).decode('ascii')
-    #print("encoded_string : ", encoded_string)
     return jsonify("data:image/png;base64," + encoded_string)
 
 
