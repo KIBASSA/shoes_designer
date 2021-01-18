@@ -7,11 +7,27 @@
                         <h4>Upload image</h4>
                     </div>
                     <div class="card-body">
-                        <input #file type="file" class="btn btn-danger pull-left"  
-                                                 (change)="fileChange(file.files)" 
-                                                 placeholder="Upload file" 
-                                                 accept=".jpg,.png,.jpeg">
-                        <img [src]="imgURL" style="margin-top: 5px;" height="500" *ngIf="imgURL">
+                        <div class="row">
+                            <div class="col-md-10">
+                                <input #file type="file" class="btn btn-danger pull-left"  
+                                                                                (change)="fileChange(file.files)" 
+                                                                                placeholder="Upload file" 
+                                                                                accept=".jpg,.png,.jpeg">
+                            </div>
+                            <div class="col-md-2">
+                                <button mat-raised-button type="submit"
+                                        class="btn btn-primary pull-left"
+                                        (click)="convertImageToEdge()">
+                                        <span class="material-icons">
+                                            autorenew
+                                            </span>
+                                        </button>
+                            </div>
+                        </div>
+                        <img [src]="imgURL" style="margin-top: 5px;" 
+                        height="500px"
+                        width="365px"
+                        *ngIf="imgURL">
                     </div>
                     <div class="card-footer">
                         <div class="stats">
@@ -23,13 +39,18 @@
             <div class="col-md-4">
                 <div class="card card-chart">
                     <div class="card-header card-header-warning">
-                        <h4>Convert to drawing</h4>
+                        <h4>Drawing</h4>
                     </div>
                     <div class="card-body">
-                        <button mat-raised-button type="submit" 
-                        class="btn btn-danger pull-left"
-                        (click)="convertImageToEdge()">Convert</button>
-                        <img [src]="imgEdgeURL" style="margin-top: 5px;" height="500" *ngIf="imgEdgeURL">
+                        <a mat-raised-button type="submit" 
+                        class="btn btn-primary pull-left"
+                        href="#{{imgEdgeURL}}"
+                        download="image.jpg"
+                        >Donwload</a>
+                        <img [src]="imgEdgeURL" style="margin-top: 5px;" 
+                        height="500px"
+                        width="365px" 
+                        *ngIf="imgEdgeURL">
                     </div>
                     <div class="card-footer">
                         <div class="stats">
@@ -40,15 +61,18 @@
             </div>
             <div class="col-md-4">
                 <div class="card card-chart">
-                    <div class="card-header card-header-danger">
-                        <h4>Convert to black leather</h4>
+                    <div class="card-header card-header-info">
+                        <h4>Black leather</h4>
                     </div>
                     <div class="card-body">
                         <button mat-raised-button 
                         type="submit" 
-                        class="btn btn-danger pull-left"
-                        (click)="convertEdgeToImage()">Convert</button>
-                        <img [src]="imgIBlackLeather" style="margin-top: 5px;" height="500" *ngIf="imgIBlackLeather">
+                        class="btn btn-primary pull-left"
+                        (click)="downloadGenerated()">Donwload</button>
+                        <img [src]="imgIBlackLeather" style="margin-top: 5px;" 
+                        height="500px"
+                        width="365px"
+                        *ngIf="imgIBlackLeather">
                     </div>
                     <div class="card-footer">
                         <div class="stats">

@@ -60,8 +60,8 @@ def test_too_large():
     print("encoded_string : ", encoded_string)
     return jsonify("data:image/png;base64," + encoded_string)
 
-@app.route('/generate_edge', methods=['GET'])
-def generate_edge():
+@app.route('/generate_images', methods=['GET'])
+def generate_images():
     base64Img = request.args.get('image')
     base64Img = base64Img.replace(" ", "+")
     ext = guess_extension(guess_type(base64Img)[0])
@@ -74,13 +74,19 @@ def generate_edge():
             decoded = Helper.decode_base64(encoded_content)
             f.write(decoded)
         _, hed = edge_transformer.transform(local_full_path_file)
-        #hed = np.invert(hed) #inverse color
+        
         filename_hed = os.path.join(folder, "{0}_hed_{1}".format(Helper.generate_name(), ext))
         cv2.imwrite(filename_hed, hed)
         with open(filename_hed, "rb") as image_file:
             encoded_string = base64.b64encode(image_file.read()).decode('ascii')
-    
-        hed_image_base64 = "data:image/png;base64," + encoded_string
+
+        hed_to_return = np.invert(hed) #inverse color
+        filename_hed_to_return = os.path.join(folder, "{0}_hed_to_return_{1}".format(Helper.generate_name(), ext))
+        cv2.imwrite(filename_hed_to_return, hed_to_return)
+        with open(filename_hed_to_return, "rb") as image_file:
+            hed_to_return_encoded_string = base64.b64encode(image_file.read()).decode('ascii')
+            
+        hed_image_base64 = "data:image/png;base64," + hed_to_return_encoded_string
 
         mask = Image.open(filename_hed)
         mask = transforms(mask)
@@ -95,7 +101,7 @@ def generate_edge():
             encoded_string = base64.b64encode(image_file.read()).decode('ascii')
         generated_image_base64 = "data:image/png;base64," + encoded_string
 
-    return jsonify(generated_image_base64)
+    return jsonify({"hed":hed_image_base64, "generated":generated_image_base64})
 
 @app.route('/generate_shoe_by_hed', methods=['GET'])
 def generate_shoe_by_hed():

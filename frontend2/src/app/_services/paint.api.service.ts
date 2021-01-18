@@ -18,8 +18,8 @@ export class PaintApiService {
                 })
           );
     }
-    generate_edge(image:string) : Observable<string> {
-      return this.http.get<any>(`${API_URL}/generate_edge?image=${image}`)
+    generate_images(image:string) : Observable<string> {
+      return this.http.get<any>(`${API_URL}/generate_images?image=${image}`)
         .pipe(
           catchError(err => {
             console.log(err);
