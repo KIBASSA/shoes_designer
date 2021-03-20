@@ -22,7 +22,7 @@ lambda_recon = 200
 n_epochs = 40
 input_dim = 1 # for edge image (1, 512, 512 )
 real_dim = 3
-display_step = 200
+display_step = 202
 batch_size = 4
 lr = 0.0002
 target_shape = 512
@@ -94,7 +94,7 @@ def weights_init(m):
 # Feel free to change pretrained to False if you're training the model from scratch
 pretrained = True
 if pretrained:
-    loaded_state = torch.load("pix2pix_black_briant_high_resolution1800.pth")
+    loaded_state = torch.load("pix2pix_black_briant_high_resolution1212.pth")
     gen.load_state_dict(loaded_state["gen"])
     gen_opt.load_state_dict(loaded_state["gen_opt"])
     disc.load_state_dict(loaded_state["disc"])

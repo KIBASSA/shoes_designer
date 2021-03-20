@@ -1,0 +1,18 @@
+https://dzone.com/articles/deploy-an-angular-app-from-visual-studio-code-to-a-1
+1. copier le fichier web.config dans le dossier src/assets
+2. spécifier dans le fichier angular.json, section projects/frontend/architect/build/options/assets, la référence à se fichier
+3. ng build --prod  : pour crée le dossier dist
+4. mettre SCM_DO_BUILD_DURING_DEPLOYMENT=false dans le fichier dist/.deployment
+5. Si c'est un déploiement linux :
+   a. Aller dans app service > Configuration
+
+   b. Dans Configuration, sélectionner le tab -> General Settings
+
+   c. Dans commande de démarrage ou ("Startup Command" en anglais), entrer la commande suivante:
+
+        pm2 serve /home/site/wwwroot --no-daemon --spa
+
+Votre application devrait maintenant pouvoir apparaître à la place de la page par défaut.
+
+La raison pour laquelle votre application ne fonctionne pas est qu'elle fonctionne sous Linux, et que Linux n'a pas de serveur IIS pour gérer les routes de votre application de noeud (il va quelque chose dans ce sens).
+

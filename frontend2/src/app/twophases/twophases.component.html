@@ -1,5 +1,28 @@
 <div class="main-content">
     <div class="container-fluid">
+        <div >
+            <button mat-raised-button="" class="btn btn-sm mat-raised-button mat-button-base">
+                <span class="mat-button-wrapper" style="text-transform: none;">Pix2Pix</span><div matripple="" class="mat-ripple mat-button-ripple"></div>
+                <div class="mat-button-focus-overlay"></div>
+            </button>
+            <button mat-raised-button="" class="btn btn-sm mat-raised-button mat-button-base">
+                <span class="mat-button-wrapper" style="text-transform: none;">U-Net</span><div matripple="" class="mat-ripple mat-button-ripple"></div>
+                <div class="mat-button-focus-overlay"></div>
+            </button>
+            <button mat-raised-button="" class="btn btn-sm mat-raised-button mat-button-base">
+                <span class="mat-button-wrapper" style="text-transform: none;">Image-to-Image Translation</span><div matripple="" class="mat-ripple mat-button-ripple"></div>
+                <div class="mat-button-focus-overlay"></div>
+            </button>
+            <button mat-raised-button="" class="btn btn-sm mat-raised-button mat-button-base">
+                <span class="mat-button-wrapper" style="text-transform: none;">Conditional  GAN</span><div matripple="" class="mat-ripple mat-button-ripple"></div>
+                <div class="mat-button-focus-overlay"></div>
+            </button>
+        </div>
+        <div>
+          <p>
+            Warning : only images from the sarenza.com site work more or less well. Most of the trainset comes from there.
+          </p>
+        </div>
         <div class="row">
             <div class="col-md-4">
                 <div class="card card-chart">
@@ -9,10 +32,20 @@
                     <div class="card-body">
                         <div class="row">
                             <div class="col-md-10">
-                                <input #file type="file" class="btn btn-danger pull-left"  
+                                <input #file type="file" class="btn btn-sm btn-danger pull-left"  style="text-transform:none;font-size: 9px;"
                                                                                 (change)="fileChange(file.files)" 
                                                                                 placeholder="Upload file" 
                                                                                 accept=".jpg,.png,.jpeg">
+                                
+                                <button mat-raised-button="" 
+                                        mat-min-fab="" 
+                                        style="margin-left: 10px;"
+                                        (click)="chooseImage()"
+                                        class="btn btn-sm btn-danger btn-round btn-fab mat-raised-button mat-button-base">
+                                    <span class="mat-button-wrapper">
+                                        <i class="material-icons">touch_app</i>
+                                    </span>
+                                </button>
                             </div>
                             <div class="col-md-2">
                                 <button mat-raised-button type="submit"
@@ -31,7 +64,7 @@
                     </div>
                     <div class="card-footer">
                         <div class="stats">
-                            <i class="material-icons">access_time</i> updated 4 minutes ago
+                            <i class="material-icons">access_time</i>Upload image
                         </div>
                     </div>
                 </div>
@@ -43,10 +76,11 @@
                     </div>
                     <div class="card-body">
                         <a mat-raised-button type="submit" 
-                        class="btn btn-primary pull-left"
+                        class="btn btn-primary pull-left disabled"
                         href="#{{imgEdgeURL}}"
-                        download="image.jpg"
-                        >Donwload</a>
+                        download="image.jpg" 
+                        >Donwload</a> 
+                        <img src="/assets/gif/loading.gif" *ngIf="loading" style="width: 50px;">
                         <img [src]="imgEdgeURL" style="margin-top: 5px;" 
                         height="500px"
                         width="365px" 
@@ -54,7 +88,7 @@
                     </div>
                     <div class="card-footer">
                         <div class="stats">
-                            <i class="material-icons">access_time</i> campaign sent 2 days ago
+                            <i class="material-icons">access_time</i> to drawing
                         </div>
                     </div>
                 </div>
@@ -65,10 +99,11 @@
                         <h4>Black leather</h4>
                     </div>
                     <div class="card-body">
-                        <button mat-raised-button 
+                        <a mat-raised-button 
                         type="submit" 
-                        class="btn btn-primary pull-left"
-                        (click)="downloadGenerated()">Donwload</button>
+                        class="btn btn-primary pull-left disabled"
+                        (click)="downloadGenerated()">Donwload</a>
+                        <img src="/assets/gif/loading.gif" *ngIf="loading" style="width: 50px;">
                         <img [src]="imgIBlackLeather" style="margin-top: 5px;" 
                         height="500px"
                         width="365px"
@@ -76,7 +111,7 @@
                     </div>
                     <div class="card-footer">
                         <div class="stats">
-                            <i class="material-icons">access_time</i> campaign sent 2 days ago
+                            <i class="material-icons">access_time</i> to black leather
                         </div>
                     </div>
                 </div>
@@ -85,3 +120,27 @@
     </div>
   </div>
   
+
+
+  <ng-template #chooseImageModal let-modal class="modal fade" id="exampleModal-2" aria-labelledby="exampleModalLabel-2">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel-2">Choose from existing images</h5>
+        <button type="button" class="close" (click)="modal.dismiss()" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="row">
+            <div class="col-md-4" *ngFor="let image of getImagesList()">
+                <div class="card mb-4 box-shadow">
+                  <img class="card-img-top" [src]="image"  data-holder-rendered="true" (click)="ImageChoosed(image);" style="cursor: pointer;">
+                </div>
+            </div>
+          </div> 
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-success" (click)="closeModal(modal)">OK</button>
+      </div>
+    </div>
+  </ng-template>  

@@ -51,3 +51,11 @@ testem.log
 .DS_Store
 Thumbs.db
 ipynb_checkpoints
+.ipynb_checkpoints
+.deployment
+
+
+ShoesGanAPI.PublishSettings
+
+#angular modules
+node_modules

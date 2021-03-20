@@ -1,0 +1,12 @@
+
+1. erreur durant le deployement. Précisement lors de la commande "ng build --prod"
+ERROR in Exceeded maximum budget for C:/Users/j.kibassa.maliba/Documents/Avanade/Huml_Cancer/Huml_Annotation_App/frontend/src/app/prediction/prediction.component.css. Budget 0 bytes was not met by 141 kB with a total of 141 kB.
+
+solution:
+         supprimer la partie "anyComponentStyle" dans le fichier json angular.json
+
+
+
+2. You do not have permission to view this directory or page.
+
+solution :

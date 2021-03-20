@@ -5,3 +5,4 @@ scikit-image
 flask
 flask_restful
 #conda install pytorch torchvision torchaudio cudatoolkit=10.2 -c pytorch
+#pip install torch===1.7.1 torchvision===0.8.2 torchaudio===0.7.2 -f https://download.pytorch.org/whl/torch_stable.html

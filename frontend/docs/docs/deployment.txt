@@ -1,0 +1,5 @@
+https://dzone.com/articles/deploy-an-angular-app-from-visual-studio-code-to-a-1
+1. copier le fichier web.config dans le dossier src/assets
+2. spécifier dans le fichier angular.json, section projects/frontend/architect/build/options/assets, la référence à se fichier
+2. ng build --prod  : pour crée le dossier dist
+

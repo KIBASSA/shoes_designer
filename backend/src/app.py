@@ -1,6 +1,8 @@
+
+
 import os
 import sys
-sys.path.append("pix2pixs/")
+sys.path.append(os.path.join(os.getcwd(), "pix2pixs/"))
 from classes import UNet, show_tensor_images
 from tools import Helper
 import torch
@@ -30,27 +32,19 @@ input_dim = 1 # for edge image (1, 256, 256 )
 real_dim = 3
 image_shape = (512,512)
 
+print("current : ", os.getcwd())
 #load model
 gen = UNet(input_dim, real_dim).to(device)
-loaded_state = torch.load("../notebooks/best_weight/pix2pix_black_briant_high_resolution1800.pth")
+loaded_state = torch.load(os.path.join(os.getcwd(), "models/gan_shoes_model/pix2pix_black_briant_high_resolution.pth"))
 gen.load_state_dict(loaded_state["gen"])
 
 transforms = transforms.Compose([transforms.ToTensor(),transforms.Resize(image_shape)])
-edge_transformer = EdgeTransformer("../models/hed_model")
+edge_transformer = EdgeTransformer(os.path.join(os.getcwd(), "models/hed_model"))
 
-"""
-@app.route('/generate_shoe', methods=['POST'])
-def generate_shoe():
-    data = request.data
-    print("request.get_json() :", request.get_json())
-    print("request : ", request.form)
-    encoded_data = data.split(',')[1]
-    nparr = np.fromstring(encoded_data.decode('base64'), np.uint8)
-    img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
-    cv2.imshow(img)
-    cv2.waitKey(0)
-    cv2.destroyAllWindows()
-"""
+
+@app.route("/")
+def hello():
+    return "Hello, I Shoes Designer API"
 
 @app.route("/test_too_large", methods=['GET'])
 def test_too_large():
@@ -63,6 +57,56 @@ def test_too_large():
 @app.route('/generate_images', methods=['GET'])
 def generate_images():
     base64Img = request.args.get('image')
+    print("GET base64Img :", type(base64Img))
+    print("GET base64Img :", base64Img)
+    base64Img = base64Img.replace(" ", "+")
+    ext = guess_extension(guess_type(base64Img)[0])
+    with tempfile.TemporaryDirectory() as folder:
+        local_full_path_file = os.path.join(folder, "{0}{1}".format(Helper.generate_name(), ext))
+        exts = ["jpeg", "jpg", "png", "gif", "tiff"]
+        with open(local_full_path_file, 'wb') as f:
+            content = base64Img.split(',')[1]
+            encoded_content= content.encode()
+            decoded = Helper.decode_base64(encoded_content)
+            f.write(decoded)
+        _, hed = edge_transformer.transform(local_full_path_file)
+        
+        filename_hed = os.path.join(folder, "{0}_hed_{1}".format(Helper.generate_name(), ext))
+        cv2.imwrite(filename_hed, hed)
+        with open(filename_hed, "rb") as image_file:
+            encoded_string = base64.b64encode(image_file.read()).decode('ascii')
+
+        hed_to_return = np.invert(hed) #inverse color
+        filename_hed_to_return = os.path.join(folder, "{0}_hed_to_return_{1}".format(Helper.generate_name(), ext))
+        cv2.imwrite(filename_hed_to_return, hed_to_return)
+        with open(filename_hed_to_return, "rb") as image_file:
+            hed_to_return_encoded_string = base64.b64encode(image_file.read()).decode('ascii')
+            
+        hed_image_base64 = "data:image/png;base64," + hed_to_return_encoded_string
+
+        mask = Image.open(filename_hed)
+        mask = transforms(mask)
+        mask = mask.unsqueeze(0)
+        mask = nn.functional.interpolate(mask, size=image_shape)
+        mask = mask.to(device)
+        with torch.no_grad():
+            generated_image = gen(mask)
+        generated_image_file = os.path.join(folder, Helper.generate_name() + ".png")
+        save_image(generated_image[0], generated_image_file)
+        with open(generated_image_file, "rb") as image_file:
+            encoded_string = base64.b64encode(image_file.read()).decode('ascii')
+        generated_image_base64 = "data:image/png;base64," + encoded_string
+
+    return jsonify({"hed":hed_image_base64, "generated":generated_image_base64})
+
+@app.route('/generate_images_post', methods=['POST'])
+def generate_images_post():
+    if "image" not in request.form:
+        return "image must be provided", status.HTTP_400_BAD_REQUEST
+
+    base64Img = request.form['image']
+    print("POST base64Img :", type(base64Img))
+    print("POST base64Img :", base64Img)
     base64Img = base64Img.replace(" ", "+")
     ext = guess_extension(guess_type(base64Img)[0])
     with tempfile.TemporaryDirectory() as folder:

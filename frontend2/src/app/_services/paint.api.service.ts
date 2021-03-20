@@ -27,6 +27,20 @@ export class PaintApiService {
               })
         );
     }
+    //generate_images_post
+    generate_images_post(image : any): Observable<string> {
+      const formData = new FormData();
+      //formData.append('image',  JSON.stringify(image));
+      formData.append('image',  image);
+      //urlSearchParams.append('password', password);
+      return this.http.post<any>(`${API_URL}/generate_images_post`, formData)
+        .pipe(
+          catchError(err => {
+            console.log(err);
+            return of(null);
+              })
+        );
+  }
 
     //generate_shoe_by_hed
     generate_shoe_by_hed(image:string) : Observable<string> {
@@ -63,5 +77,13 @@ export class PaintApiService {
               })
         );
   }
-
+  
+  getBase64ImageFromURL(url: string): Observable<any> {
+    return this.http.get(url, { responseType: 'blob' }).pipe(
+      catchError(err => {
+        console.log(err);
+        return of(null);
+          })
+    );
+ }
 }

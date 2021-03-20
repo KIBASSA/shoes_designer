@@ -1,5 +1,6 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit,TemplateRef, ViewChild } from '@angular/core';
 import { PaintApiService } from '../_services/paint.api.service'
+import { NgbModal,NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
 @Component({
   selector: 'app-twophases',
   templateUrl: './twophases.component.html',
@@ -11,8 +12,11 @@ export class TwophasesComponent implements OnInit {
   imgEdgeURL : any;
   imgIBlackLeather: any;
   public message: string;
-
-  constructor(private paintApi : PaintApiService) {}
+  loading:boolean
+  modalReference: NgbModalRef;
+  @ViewChild('chooseImageModal', {static: false}) chooseImageModal : TemplateRef<any>; // Note: TemplateRef
+  constructor(private paintApi : PaintApiService,
+    private modalService: NgbModal) {}
 
   ngOnInit(): void {}
   fileChange(files:any) {
@@ -27,19 +31,24 @@ export class TwophasesComponent implements OnInit {
   
       var reader = new FileReader();
       this.imagePath = files;
+      
       reader.readAsDataURL(files[0]); 
       reader.onload = (_event) => { 
         this.imgURL = reader.result;
+        this.imgEdgeURL = null
+        this.imgIBlackLeather = null
         console.log(this.imgURL)
       }
    }
 
    convertImageToEdge()
    {
-     this.paintApi.generate_images(this.imgURL).subscribe(res=> 
+     this.loading = true
+     this.paintApi.generate_images_post(this.imgURL).subscribe(res=> 
       {
         this.imgEdgeURL = res["hed"]
         this.imgIBlackLeather = res["generated"]
+        this.loading = false
       })
    }
 
@@ -79,6 +88,35 @@ export class TwophasesComponent implements OnInit {
           document.body.removeChild(link);
       }
    }
+   chooseImage()
+   {
+    this.modalReference = this.modalService.open(this.chooseImageModal, { size: 'lg'});
+   }
+  
+   getImagesList()
+   {
+      var images = []
+      Array.from(Array(148).keys()).forEach(a=> 
+      {
+        images.push("assets/shoes/" + a.toString() + ".jpg")
+      });
+     return images
+   }
+   ImageChoosed(image:any)
+   {
+    console.log(image)
+    this.paintApi.getBase64ImageFromURL(image).subscribe(res=> 
+      {
+        console.log(res)
+        var reader = new FileReader();
+        reader.readAsDataURL(res); 
+        reader.onload = (_event) => { 
+        this.imgURL = reader.result;
+        this.modalReference.close();
+        }
+      })
+   }
+   
    downloadGenerated()
    {
 
